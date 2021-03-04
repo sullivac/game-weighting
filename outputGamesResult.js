@@ -9,11 +9,17 @@ function toOutputString ({
   weightedScore,
   grossScore,
   count,
-  scores
+  scores,
+  scoreStandardDeviation
 }) {
-  return [gameName, weightedScore, grossScore, count, scores.join(', ')].join(
-    '\t'
-  )
+  return [
+    gameName,
+    weightedScore,
+    grossScore,
+    count,
+    scores.join(', '),
+    scoreStandardDeviation
+  ].join('\t')
 }
 
 module.exports = {

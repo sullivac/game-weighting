@@ -1,24 +1,14 @@
 'use strict'
 
-function byDescending (left, right) {
-  return right - left
-}
+const { descending, byAscending, byDescending } = require('./sorting')
 
-function byWeightedScoreThenOccurrencesThenGrossScore (left, right) {
-  const weightedResult = byDescending(left.weightedScore, right.weightedScore)
-
-  if (!weightedResult) {
-    const occurrenceResult = byDescending(left.count, right.count)
-
-    if (!occurrenceResult) {
-      return byDescending(left.grossScore, right.grossScore)
-    }
-
-    return occurrenceResult
-  }
-
-  return weightedResult
-}
+const byWeightedScoreDescending = byDescending(
+  ({ weightedScore }) => weightedScore
+)
+const byPlayerCountDescending = byDescending(({ count }) => count)
+const byStandardDeviation = byAscending(
+  ({ scoreStandardDeviation }) => scoreStandardDeviation
+)
 
 function ensureGameEntry (gameEntries, gameMap, gameName) {
   if (gameMap.has(gameName)) {
@@ -37,13 +27,24 @@ function ensureGameEntry (gameEntries, gameMap, gameName) {
   return result
 }
 
-function toGameResult ({ gameName, scores, weightedScores }) {
-  return {
-    gameName,
-    count: scores.length,
-    scores: scores.sort(byDescending),
-    weightedScore: weightedScores.reduce(toSum, 0),
-    grossScore: scores.reduce(toSum, 0)
+function toGameResult (playerCount) {
+  return function ({ gameName, scores, weightedScores }) {
+    const weightedScore = weightedScores.reduce(toSum, 0)
+
+    return {
+      gameName,
+      count: scores.length,
+      scores: scores.slice().sort(descending),
+      weightedScore,
+      grossScore: scores.reduce(toSum, 0),
+      scoreStandardDeviation: Math.sqrt(
+        (scores
+          .map(score => Math.pow(score - weightedScore, 2))
+          .reduce(toSum, 0) +
+          (playerCount - scores.length) * Math.pow(weightedScore, 2)) /
+          playerCount
+      )
+    }
   }
 }
 
@@ -104,8 +105,12 @@ function processGames (players) {
   return players
     .flatMap(toPlayerGames(toPlayerGame(longestGameListLength, playerCount)))
     .reduce(toGameEntry(), [])
-    .map(toGameResult)
-    .sort(byWeightedScoreThenOccurrencesThenGrossScore)
+    .map(toGameResult(playerCount))
+    .sort(
+      byWeightedScoreDescending
+        .then(byPlayerCountDescending)
+        .then(byStandardDeviation)
+    )
 }
 
 module.exports = { processGames }
