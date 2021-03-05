@@ -14,7 +14,7 @@ function thenBy (next) {
   return applyThen(function sort (left, right) {
     const parentResult = parent(left, right)
 
-    return parentResult ? parentResult : next(left, right)
+    return parentResult || next(left, right)
   })
 }
 
