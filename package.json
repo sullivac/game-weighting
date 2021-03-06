@@ -9,8 +9,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "googleapis": "^67.1.1"
+  },
+  "devDependencies": {
     "eslint": "^7.21.0",
-    "googleapis": "^67.1.1",
     "prettier-standard": "^16.4.1",
     "standard": "^16.0.3",
     "typescript": "^2.9.2"
