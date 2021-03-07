@@ -12,9 +12,7 @@ function thenBy (next) {
   const parent = this
 
   return applyThen(function sort (left, right) {
-    const parentResult = parent(left, right)
-
-    return parentResult || next(left, right)
+    return parent(left, right) || next(left, right)
   })
 }
 
