@@ -1,12 +1,9 @@
 {
   "name": "game-weighting",
   "version": "1.0.0",
-  "description": "",
+  "description": "Reads game preference data from a Google Sheets spreadsheet, analyzes and sorts the data, and writes the results to another spreadsheet.",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
+  "author": "Corey Sullivan <sullivac@fastmail.fm>",
   "license": "ISC",
   "dependencies": {
     "googleapis": "^67.1.1"
