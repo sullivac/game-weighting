@@ -34,6 +34,6 @@ function applyThen (sort) {
 
 module.exports = {
   descending,
-  byAscending: applyThen(sorter(ascending)),
-  byDescending: applyThen(sorter(descending))
+  byAscending: sorter(ascending),
+  byDescending: sorter(descending)
 }
