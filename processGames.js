@@ -1,14 +1,53 @@
 'use strict'
 
+const identity = require('./identity')
+
 const { descending, byAscending, byDescending } = require('./sorting')
 
-const byWeightedScoreDescending = byDescending(
-  ({ weightedScore }) => weightedScore
-)
-const byPlayerCountDescending = byDescending(({ count }) => count)
-const byStandardDeviation = byAscending(
-  ({ scoreStandardDeviation }) => scoreStandardDeviation
-)
+function toMax (accumulator, operator) {
+  return Math.max(accumulator, operator)
+}
+
+function normalizeGameName (gameName) {
+  return gameName.replace(/ \([\d\w+]*\)/, '')
+}
+
+function toUniqueGames () {
+  const gameSet = new Set()
+
+  function addGame (accumulator, gameName) {
+    gameSet.add(gameName)
+    accumulator.push(gameName)
+
+    return accumulator
+  }
+
+  return function (accumulator, gameName) {
+    return gameSet.has(gameName)
+      ? identity(accumulator)
+      : addGame(accumulator, gameName)
+  }
+}
+
+function toNormalizedGames (player) {
+  return { games: player.games.map(normalizeGameName).reduce(toUniqueGames(), []) }
+}
+
+function toIndexedGame ({ games }) {
+  return games.map((gameName, index) => ({ gameName, index }))
+}
+
+function toScoredGame (longestGameListLength, playerCount) {
+  return function ({ gameName, index }) {
+    const score = longestGameListLength - index
+
+    return {
+      gameName,
+      score,
+      weightedScore: score / playerCount
+    }
+  }
+}
 
 function getGameEntry (gameEntries, gameMap, gameName) {
   if (gameMap.has(gameName)) {
@@ -44,6 +83,10 @@ function toGameEntry () {
   }
 }
 
+function toSum (accumulator, operator) {
+  return accumulator + operator
+}
+
 function toGameResult (playerCount) {
   return function ({ gameName, scores, weightedScores }) {
     const weightedScore = weightedScores.reduce(toSum, 0)
@@ -65,33 +108,13 @@ function toGameResult (playerCount) {
   }
 }
 
-function toIndexedGame (player) {
-  return player.games.map((gameName, index) => ({ gameName, index }))
-}
-
-function toMax (accumulator, operator) {
-  return Math.max(accumulator, operator)
-}
-
-function toNormalizedGameName (gameName) {
-  return gameName.replace(/ \([\d\w+]*\)/, '')
-}
-
-function toScoredGame (longestGameListLength, playerCount) {
-  return function ({ gameName, index }) {
-    const score = longestGameListLength - index
-
-    return {
-      gameName: toNormalizedGameName(gameName),
-      score,
-      weightedScore: score / playerCount
-    }
-  }
-}
-
-function toSum (accumulator, operator) {
-  return accumulator + operator
-}
+const byWeightedScoreDescending = byDescending(
+  ({ weightedScore }) => weightedScore
+)
+const byPlayerCountDescending = byDescending(({ count }) => count)
+const byStandardDeviation = byAscending(
+  ({ scoreStandardDeviation }) => scoreStandardDeviation
+)
 
 function processGames (players) {
   const longestGameListLength = players
@@ -101,8 +124,9 @@ function processGames (players) {
   const playerCount = players.length
 
   return players
+    .map(toNormalizedGames)
     .flatMap(toIndexedGame)
-    .map(toScoredGame(longestGameListLength, playerCount))
+    .map(toScoredGame(longestGameListLength, playerCount), [])
     .reduce(toGameEntry(), [])
     .map(toGameResult(playerCount))
     .sort(
