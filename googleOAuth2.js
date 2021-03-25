@@ -3,7 +3,7 @@
 const { google } = require('googleapis')
 const path = require('path')
 const readline = require('readline')
-const { writeFile } = require('fs/promises')
+const { rm, writeFile } = require('fs/promises')
 
 const { readJsonFile } = require('./readJsonFile')
 
@@ -84,4 +84,11 @@ function initializeGoogleOAuth2Client (useOAuth2Client) {
     .then(useOAuth2Client)
 }
 
-module.exports = { initializeGoogleOAuth2Client }
+function removeToken () {
+  return rm(oAuth2TokenPath)
+}
+
+module.exports = {
+  initializeGoogleOAuth2Client,
+  removeToken
+}
