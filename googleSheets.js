@@ -25,7 +25,7 @@ function initializeGoogleSheetsApi (auth) {
 
 function getValues (spreadsheetsValues) {
   return function () {
-    spreadsheetsValues
+    return spreadsheetsValues
       .get(getValuesOptions)
       .then(({ data: { values } }) => values)
   }
