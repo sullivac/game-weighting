@@ -117,14 +117,14 @@ const byStandardDeviation = byAscending(
 )
 
 function processGames (players) {
-  const longestGameListLength = players
+  const playerNormalizedGames = players.map(toNormalizedGames)
+  const longestGameListLength = playerNormalizedGames
     .map(player => player.games.length)
     .reduce(toMax, 0)
 
   const playerCount = players.length
 
-  return players
-    .map(toNormalizedGames)
+  return playerNormalizedGames
     .flatMap(toIndexedGame)
     .map(toScoredGame(longestGameListLength, playerCount), [])
     .reduce(toGameEntry(), [])
